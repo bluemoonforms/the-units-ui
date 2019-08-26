@@ -2,9 +2,6 @@
   <v-container>
     <v-layout text-center wrap>
       <v-flex md12>
-        <v-img :src="require('../assets/logo.svg')" class='my-3' contain height='50'></v-img>
-      </v-flex>
-      <v-flex md12>
         <form>
           <v-text-field v-model='username' :rules='usernameRules' label='Username' required></v-text-field>
           <v-text-field
@@ -28,7 +25,6 @@ export default {
     return {
       username: '',
       password: '',
-      valid: false,
       usernameRules: [v => !!v || 'Username is required'],
       passwordRules: [v => !!v || 'E-mail is required']
     };
@@ -40,27 +36,24 @@ export default {
     },
     submit() {
       if (this.password.length > 0) {
-        this.$http
-          .post('http://localhost:9020/login', {
-            username: this.username,
-            password: this.password
-          })
-          .then(response => {
-            localStorage.setItem('user', response.data.username);
-            localStorage.setItem('jwt', response.data.access_token);
+        this.$http.post('/login', {
+          username: this.username,
+          password: this.password
+        }).then(response => {
+          localStorage.setItem('user', response.data.username);
+          localStorage.setItem('jwt', response.data.access_token);
 
-            if (localStorage.getItem('jwt') != null) {
-              this.$emit('loggedIn');
-              if (this.$route.params.nextUrl != null) {
-                this.$router.push(this.$route.params.nextUrl);
-              } else {
-                this.$router.push('/');
-              }
+          if (localStorage.getItem('jwt') != null) {
+            this.$emit('loggedIn');
+            if (this.$route.params.nextUrl != null) {
+              this.$router.push(this.$route.params.nextUrl);
+            } else {
+              this.$router.push('/');
             }
-          })
-          .catch(function(error) {
-            console.error(error.response);
-          });
+          }
+        }).catch(function(error) {
+          console.error(error.response);
+        });
       }
     }
   }

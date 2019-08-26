@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import Leases from '@/components/Leases'
+import Lease from '@/components/Lease'
 import Login from '@/components/Login'
 
 Vue.use(Router)
@@ -10,8 +11,8 @@ let router = new Router({
   routes: [
     {
       path: '/',
-      name: 'hello-world',
-      component: HelloWorld,
+      name: 'leases',
+      component: Leases,
       meta: {
         requiresAuth: true
       }
@@ -24,9 +25,16 @@ let router = new Router({
         guest: true
       }
     },
+    {
+      path: '/lease/:id',
+      name: 'lease',
+      component: Lease,
+      meta: {
+        requiresAuth: true
+      }
+    }
   ]
 })
-
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
