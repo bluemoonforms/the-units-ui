@@ -1,5 +1,17 @@
 <template>
   <v-container>
+    <v-dialog v-model="pdfDialog" persistent max-width="300px">
+      <v-card>
+        <v-card-title class="headline">Your document is ready.</v-card-title>
+        <v-card-text text-align="center">
+          <a :href="downloadUrl" _target="blank">Download</a>
+        </v-card-text>
+        <v-card-actions>
+          <div class="flex-grow-1"></div>
+          <v-btn color="green darken-1" text @click="pdfDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="executeDialog" persistent max-width="600px">
       <v-card>
         <v-card-title>
@@ -65,8 +77,8 @@
             <p v-if="item.status === 'executed'">All actions are complete.</p>
             <span v-if="item.status === 'processing'"><p>Waiting for signers.</p></span>
             <span v-if="item.status === 'signed'">
-              <p>Ready to execute document.</p>
-              <v-btn @click="executeDocument(item)">Execute Document</v-btn>
+              <p>Ready to counter-sign document.</p>
+              <v-btn @click="executeDocument(item)">Counter-Sign Document</v-btn>
             </span>
             <span v-if="item.data && item.data.esign && item.data.esign.data && item.data.esign.data.signers">
               <v-simple-table fixed-header height="300px">
@@ -87,7 +99,7 @@
                     <td class="text-left">{{ signer.email }}</td>
                     <td class="text-left">{{ signer.phone }}</td>
                     <td class="text-left">{{ signer.completed }}</td>
-                    <td class="text-left">{{ signer.signature_url }}</td>
+                    <td class="text-left"><a :href="signer.signature_url" target="_blank">{{ signer.signature_url }}</a></td>
                     <td class="text-left">{{ signer.date_signed | formatDate}}</td>
                     <td class="text-left text-capitalize">{{ signer.identifier.replace(/_/g, ' ') }}</td>
                   </tr>
@@ -96,7 +108,7 @@
             </span>
           </v-card-text>
           <v-card-actions>
-            <v-btn text>View PDF</v-btn>
+            <v-btn @click="getSignaturePdf(item)">View PDF</v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
@@ -108,6 +120,8 @@
 export default {
   data() {
     return {
+      pdfDialog: false,
+      downloadUrl: null,
       executeDialog: false,
       executeData: {
         name: '',
@@ -157,6 +171,22 @@ export default {
         default:
           break;
       }
+    },
+    getSignaturePdf: function (leaseEsignature) {
+      const path = '/lease/esignature/pdf/' + leaseEsignature.id;
+      const token = localStorage.getItem('jwt');
+      this.$http
+        .get(path, { headers: { Authorization: 'Bearer ' + token } })
+        .then(response => {
+          if (response.data.success) {
+            this.pdfDialog = true;
+            this.downloadUrl = response.data.url;
+          }
+        })
+        .catch(function(error) {
+          // eslint-disable-next-line
+          console.error(error);
+        });
     },
     launchEditor: function () {
       const path = '/configuration/' + this.$route.params.id;

@@ -14,8 +14,8 @@
       <v-card>
         <v-card-title class="headline">Esignature Requested</v-card-title>
         <v-card-text text-align="center">
-          <p v-if="esignatureSuccess === false">Unable to request esignature, please try again.</p>
-          <p v-if="esignatureSuccess">Esignatures are pending, thanks!.</p>
+          <p v-if="esignSuccess === false">Unable to request esignature, please try again.</p>
+          <p v-if="esignSuccess">Esignatures are pending, thanks!.</p>
         </v-card-text>
         <v-card-actions>
           <div class="flex-grow-1"></div>
