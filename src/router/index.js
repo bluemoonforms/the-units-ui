@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Leases from '@/components/Leases'
 import Lease from '@/components/Lease'
+import Document from '@/components/Document';
+import Leases from '@/components/Leases'
 import Login from '@/components/Login'
+import Logout from '@/components/Logout'
 
 Vue.use(Router)
 
@@ -26,15 +28,31 @@ let router = new Router({
       }
     },
     {
+      path: '/logout',
+      name: 'logout',
+      component: Logout,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/lease/:id',
       name: 'lease',
       component: Lease,
       meta: {
         requiresAuth: true
       }
-    }
+    },
+    {
+      path: '/document/:id',
+      name: 'document',
+      component: Document,
+      meta: {
+        requiresAuth: true
+      }
+    },
   ]
-})
+});
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {

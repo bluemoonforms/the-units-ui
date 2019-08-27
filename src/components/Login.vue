@@ -26,7 +26,7 @@ export default {
       username: '',
       password: '',
       usernameRules: [v => !!v || 'Username is required'],
-      passwordRules: [v => !!v || 'E-mail is required']
+      passwordRules: [v => !!v || 'Password is required']
     };
   },
   methods: {
@@ -52,7 +52,8 @@ export default {
             }
           }
         }).catch(function(error) {
-          console.error(error.response);
+          // eslint-disable-next-line
+          console.error(error);
         });
       }
     }
