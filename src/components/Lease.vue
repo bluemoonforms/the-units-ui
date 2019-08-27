@@ -1,5 +1,33 @@
 <template>
   <v-container>
+    <v-dialog v-model="executeDialog" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">User Profile</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field v-model="executeData.name" label="Name" required></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field v-model="executeData.initials" label="Initials*" required></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field v-model="executeData.title" label="Title*" required></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+          <small>*indicates required field</small>
+        </v-card-text>
+        <v-card-actions>
+          <div class="flex-grow-1"></div>
+          <v-btn color="blue darken-1" text @click="executeDialog = false">Close</v-btn>
+          <v-btn color="blue darken-1" text @click="execute">Submit</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-layout wrap>
       <v-flex md12>
         <v-row>
@@ -38,7 +66,7 @@
             <span v-if="item.status === 'processing'"><p>Waiting for signers.</p></span>
             <span v-if="item.status === 'signed'">
               <p>Ready to execute document.</p>
-              <v-btn @click="executeDocument">Execute Document</v-btn>
+              <v-btn @click="executeDocument(item)">Execute Document</v-btn>
             </span>
             <span v-if="item.data && item.data.esign && item.data.esign.data && item.data.esign.data.signers">
               <v-simple-table fixed-header height="300px">
@@ -80,6 +108,13 @@
 export default {
   data() {
     return {
+      executeDialog: false,
+      executeData: {
+        name: '',
+        initials: '',
+        title: '',
+      },
+      leaseEsignatureId: null,
       token: null,
       showEditor: false,
       editorLibraries: [
@@ -124,11 +159,10 @@ export default {
       }
     },
     launchEditor: function () {
-      const token = localStorage.getItem('jwt');
       const path = '/configuration/' + this.$route.params.id;
       this.showEditor = true;
       this.$http
-        .get(path, { headers: { Authorization: 'Bearer ' + token } })
+        .get(path, { headers: { Authorization: 'Bearer ' + this.token } })
         .then(response => {
           window.BLUEMOON_CONFIG = response.data;
           const bmContainer = document.getElementById('blueMoon');
@@ -152,22 +186,44 @@ export default {
       }
       this.showEditor = false;
     },
-    executeDocument: function() {
+    fetchLease: function () {
+      const path = '/lease/' + this.$route.params.id;
+      this.$http
+        .get(path, { headers: { Authorization: 'Bearer ' + this.token } })
+        .then(response => {
+          this.lease = response.data;
+        })
+        .catch(function(error) {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    executeDocument: function (leaseEsignature) {
+      this.leaseEsignatureId = leaseEsignature.id;
+      this.executeDialog = true;
       this.$log.debug('execute document');
+    },
+    execute: function() {
+      const path = '/lease/execute/' + this.leaseEsignatureId;
+      this.$http
+        .post(path, this.executeData, { headers: { Authorization: 'Bearer ' + this.token } })
+        .then(response => {
+          this.executeDialog = false;
+          if (response.data.success) {
+            this.fetchLease();
+          } else {
+            this.$log.error(response.data);
+          }
+        })
+        .catch(function(error) {
+          // eslint-disable-next-line
+          console.error(error);
+        });
     }
   },
   mounted() {
     this.token = localStorage.getItem('jwt');
-    const path = '/lease/' + this.$route.params.id;
-    this.$http
-      .get(path, { headers: { Authorization: 'Bearer ' + this.token } })
-      .then(response => {
-        this.lease = response.data;
-      })
-      .catch(function(error) {
-        // eslint-disable-next-line
-        console.error(error);
-      });
+    this.fetchLease();
   }
 };
 </script>
