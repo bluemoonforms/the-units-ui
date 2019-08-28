@@ -3,7 +3,9 @@
     <v-dialog v-model="pdfDialog" persistent max-width="290">
       <v-card>
         <v-card-title class="headline">Your document is ready.</v-card-title>
-        <v-card-text text-align="center"><a :href="downloadUrl" _target="blank">Download</a></v-card-text>
+        <v-card-text text-align="center">
+          <pdf :src="downloadUrl"></pdf>
+        </v-card-text>
         <v-card-actions>
           <div class="flex-grow-1"></div>
           <v-btn color="green darken-1" text @click="pdfDialog = false">Close</v-btn>

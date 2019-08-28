@@ -2,8 +2,8 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
 import router from './router';
-import Axios from 'axios'
-import moment from 'moment'
+import Axios from 'axios';
+import moment from 'moment';
 
 const httpInstance = Axios.create({
   baseURL: 'http://localhost:9020',
@@ -18,7 +18,9 @@ new Vue({
   render: h => h(App),
   router,
   vuetify,
-  components: { App },
+  components: { 
+    App,
+  },
   template: '<App/>'
 }).$mount('#app')
 
