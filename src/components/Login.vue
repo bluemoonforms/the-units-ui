@@ -40,15 +40,17 @@ export default {
           username: this.username,
           password: this.password
         }).then(response => {
-          localStorage.setItem('user', response.data.username);
-          localStorage.setItem('jwt', response.data.access_token);
+          if (response.data.username) {
+            localStorage.setItem('user', response.data.username);
+            localStorage.setItem('jwt', response.data.access_token);
 
-          if (localStorage.getItem('jwt') != null) {
-            this.$emit('loggedIn');
-            if (this.$route.params.nextUrl != null) {
-              this.$router.push(this.$route.params.nextUrl);
-            } else {
-              this.$router.push('/');
+            if (localStorage.getItem('jwt') != null) {
+              this.$emit('loggedIn');
+              if (this.$route.params.nextUrl != null) {
+                this.$router.push(this.$route.params.nextUrl);
+              } else {
+                this.$router.push('/');
+              }
             }
           }
         }).catch(function(error) {
